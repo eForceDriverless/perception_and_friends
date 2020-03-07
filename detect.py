@@ -24,8 +24,9 @@ from matplotlib.ticker import NullLocator
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--image_folder", type=str, default="data/samples", help="path to dataset")
-    parser.add_argument("--model_def", type=str, default="config/yolov3.cfg", help="path to model definition file")
-    parser.add_argument("--weights_path", type=str, default="weights/yolov3.weights", help="path to weights file")
+    parser.add_argument("--model_def", type=str, default="config/yolov3-tiny-custom.cfg", help="path to model definition file")
+    # parser.add_argument("--weights_path", type=str, default="weights/yolov3-tiny.weights", help="path to weights file")
+    parser.add_argument("--weights_path", type=str, default="weights/cones_5_epochs.pth", help="path to weights file")
     parser.add_argument("--class_path", type=str, default="data/coco.names", help="path to class label file")
     parser.add_argument("--conf_thres", type=float, default=0.8, help="object confidence threshold")
     parser.add_argument("--nms_thres", type=float, default=0.4, help="iou thresshold for non-maximum suppression")
@@ -66,11 +67,14 @@ if __name__ == "__main__":
     imgs = []  # Stores image paths
     img_detections = []  # Stores detections for each image index
 
+    my_time = time.time()
+
     print("\nPerforming object detection:")
     prev_time = time.time()
     for batch_i, (img_paths, input_imgs) in enumerate(dataloader):
         # Configure input
         input_imgs = Variable(input_imgs.type(Tensor))
+        print(f"batch dim: {input_imgs.shape}")
 
         # Get detections
         with torch.no_grad():
@@ -91,6 +95,12 @@ if __name__ == "__main__":
     cmap = plt.get_cmap("tab20b")
     colors = [cmap(i) for i in np.linspace(0, 1, 20)]
 
+    my_time2 = time.time()
+    whole_time = datetime.timedelta(seconds=my_time2 - my_time)
+    time_diff = my_time2 - my_time
+    print(f"inference of 9 images: {time_diff}")
+    print(f"images per second: {60 / (time_diff/9)}")
+
     print("\nSaving images:")
     # Iterate through images and save plot of detections
     for img_i, (path, detections) in enumerate(zip(imgs, img_detections)):
@@ -106,6 +116,7 @@ if __name__ == "__main__":
         # Draw bounding boxes and labels of detections
         if detections is not None:
             # Rescale boxes to original image
+            print(detections)
             detections = rescale_boxes(detections, opt.img_size, img.shape[:2])
             unique_labels = detections[:, -1].cpu().unique()
             n_cls_preds = len(unique_labels)
@@ -139,3 +150,4 @@ if __name__ == "__main__":
         filename = path.split("/")[-1].split(".")[0]
         plt.savefig(f"output/{filename}.png", bbox_inches="tight", pad_inches=0.0)
         plt.close()
+
