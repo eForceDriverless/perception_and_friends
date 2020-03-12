@@ -29,13 +29,17 @@ def get_xy_pos(cone_x, cone_y, camera_height, WIDTH=1280, HEIGHT=720):
     return x_pos, y_pos
 
 
-
-name = 'kuzely_rovina'
-name = 'finalni_zatacka'
+# file name without extension
+# name = 'first_tests/kuzely_rovina'
+name = 'first_tests/finalni_zatacka'
 
 cap = cv2.VideoCapture(name + '.avi')
 font = cv2.FONT_HERSHEY_SIMPLEX
 f = open(name + '.txt', 'r')
+
+# # recording
+# fourcc = cv2.VideoWriter_fourcc(*'X264')
+# out = cv2.VideoWriter('videos/' + "birdview_" + name + '.avi', fourcc, 20.0, (1280, 720))
 
 camera_height = 1.2
 
@@ -92,13 +96,14 @@ while cap.isOpened():
             y_point = int(field_h * (y_pos / field_meters[1]))
 
             frame = cv2.circle(frame, (car_x - x_point, car_y - y_point), 4, color_bgr, -1)
-            frame = cv2.circle(frame, (cone_x, cone_y), 2, color_bgr, -1)
+            frame = cv2.circle(frame, (cone_x, cone_y), 2, (0, 0, 255), -1)
             print(type(x1))
 
         print("max_angle:", max_angle)
         print("min_angle:", min_angle)
 
         print(frame.shape)
+        # out.write(frame)
         cv2.imshow('Frame', frame)
 
         if cv2.waitKey(25) & 0xFF == ord('q'):
@@ -114,3 +119,4 @@ while cap.isOpened():
 
 cap.release()
 cv2.destroyAllWindows()
+out.release()
